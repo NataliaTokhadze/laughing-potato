@@ -8,6 +8,3 @@ class User(AbstractUser, TimeStampModel):
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'phone_number']
-
-    def __str__(self):
-        return self.name
