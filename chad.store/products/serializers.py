@@ -5,3 +5,6 @@ class ProductSerializer(serializers.Serializer):
     descriprion = serializers.CharField()
     price = serializers.FloatField()
     currency = serializers.ChoiceField(choices = ['GEL', 'USD', 'EURO'])
+
+class CartSerializer(serializers.Serializer):
+    quantity = serializers.IntegerField(min_value=1)

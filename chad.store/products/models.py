@@ -32,6 +32,7 @@ class ProductTag(TimeStampModel):
 class Cart(TimeStampModel):
     products = models.ManyToManyField('products.Product', related_name='carts')
     user = models.OneToOneField('users.User', related_name='cart', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)
 
 class FavoriteProduct(TimeStampModel):
     product = models.ForeignKey('products.Product',
