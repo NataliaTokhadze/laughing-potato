@@ -12,3 +12,7 @@ class CartSerializer(serializers.Serializer):
 class ProductTagSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     tag_name = serializers.CharField()
+
+class FavoriteProductSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
