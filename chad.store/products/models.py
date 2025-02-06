@@ -23,11 +23,8 @@ class Review(TimeStampModel):
         return self.name
 
 class ProductTag(TimeStampModel):
-    name = models.CharField(max_length=255)   
+    tag_name = models.CharField(max_length=255)   
     products = models.ManyToManyField('products.Product', related_name='products_tags')
-
-    def __str__(self):
-        return self.name
     
 class Cart(TimeStampModel):
     products = models.ManyToManyField('products.Product', related_name='carts')

@@ -8,3 +8,7 @@ class ProductSerializer(serializers.Serializer):
 
 class CartSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1)
+
+class ProductTagSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    tag_name = serializers.CharField()
