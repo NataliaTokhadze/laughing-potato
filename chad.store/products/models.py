@@ -1,50 +1,43 @@
 from django.db import models
-from config.model_utils.models import TimeStampModel
-from products.choices import Currency
 from django.core.validators import MaxValueValidator
+from config.model_utils.models import TimeStampedModel
+from products.choices import Currency
 
-class Product(TimeStampModel):
+class Product(TimeStampedModel, models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.FloatField()
     currency = models.CharField(max_length=255, choices=Currency.choices, default=Currency.GEL)
     quantity = models.PositiveIntegerField()
-    
-    def __str__(self):
-        return self.name
 
-class Review(TimeStampModel):
-    user = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
-    product = models.ForeignKey('products.Product', on_delete=models.CASCADE, related_name='reviews')
+    def average_rating(self):
+        pass
+
+
+class Review(TimeStampedModel, models.Model):
+    product = models.ForeignKey('products.Product', related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User', related_name='reviews', on_delete=models.SET_NULL, null=True, blank=True)
     content = models.TextField()
-    rating= models.PositiveIntegerField(validators=[MaxValueValidator(5)])
+    rating = models.PositiveIntegerField(validators=[MaxValueValidator(5)])
 
-    def __str__(self):
-        return self.name
 
-class ProductTag(TimeStampModel):
+class FavoriteProduct(TimeStampedModel, models.Model):
+    product = models.ForeignKey('products.Product', related_name='favorite_products', on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User', related_name='favorite_products', on_delete=models.SET_NULL, null=True, blank=True)
+
+
+class ProductTag(TimeStampedModel, models.Model):
     tag_name = models.CharField(max_length=255)   
     products = models.ManyToManyField('products.Product', related_name='products_tags')
-    
-class Cart(TimeStampModel):
+
+
+class Cart(TimeStampedModel, models.Model):
     products = models.ManyToManyField('products.Product', related_name='carts')
-    user = models.OneToOneField('users.User', related_name='cart', on_delete=models.CASCADE)
+    user = models.OneToOneField('users.User', related_name='cart', on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
 
-class FavoriteProduct(TimeStampModel):
-    product = models.ForeignKey('products.Product',
-                                related_name='favorite_products',
-                                on_delete=models.CASCADE)
-    user = models.ForeignKey('users.User',
-                             related_name='favorite_product',
-                             on_delete=models.SET_NULL,
-                             null=True,
-                             blank=True)
 
-class ProductImage(TimeStampModel):
+class ProductImage(TimeStampedModel, models.Model):
     image = models.ImageField(upload_to='products/')
-    product = models.ForeignKey('products.Product',
-                                related_name='images',
-                                on_delete=models.CASCADE)
+    product = models.ForeignKey('products.Product', related_name='images', on_delete=models.CASCADE)
     
-
