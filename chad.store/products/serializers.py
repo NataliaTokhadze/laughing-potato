@@ -28,7 +28,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     class Meta:
-        exclude = ['created_at', 'updated_at', 'tags'] 
+        exclude = ['created_at', 'updated_at'] 
         model = Product
 
 class CartSerializer(serializers.ModelSerializer):
