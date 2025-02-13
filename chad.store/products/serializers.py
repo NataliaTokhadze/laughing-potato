@@ -32,9 +32,27 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
 
 class CartSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    products = ProductSerializer(many=True, read_only=True)
+    product_ids = serializers.PrimaryKeyRelatedField(
+        source = 'products',
+        queryset = Product.objects.all(),
+        many=True,
+        write_only=True
+    )
+    
     class Meta:
-        exclude = ['quantity']
         model = Cart
+        fields = ['user', 'product_ids', 'products']
+        
+    def create(self, validated_data):
+        user = validated_data.pop('user')
+        products = validated_data.pop('products')
+        
+        cart, _ = Cart.objects.get_or_create(user=user)
+        cart.products.add(*products)
+        
+        return cart
 
 class ProductTagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,3 +63,30 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ['product_id', 'user_id']
         model = FavoriteProduct
+        
+class FavoriteProductSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    product_id = serializers.IntegerField(write_only=True)
+    
+    class Meta:
+        model = FavoriteProduct
+        fields = ['id', 'user', 'product', 'product_id']
+        read_only_fields = ['id', 'product']
+        
+    def validate_product_id(self, value):
+        if not Product.objects.filter(id=value).exists():
+            raise serializers.ValidationError('Product with given id not found')
+        return value
+    
+    def create(self, validated_data):
+        product_id = validated_data.pop('product_id')
+        user = validated_data.pop('user')
+        
+        product = Product.objects.get(id=product_id)
+        
+        favorite_product, created = FavoriteProduct.objects.get_or_create(user=user, product=product)
+        
+        if not created:
+            raise serializers.ValidationError('This product is already in favorites')
+        
+        return favorite_product
