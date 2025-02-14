@@ -24,12 +24,36 @@ class ReviewSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         return Review.objects.create(product=product, user=user, **validated_data)
 
+class ProductTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductTag
+        fields = ['id', 'tag_name']
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
+    tags = ProductTagSerializer(many=True, read_only=True)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        source = 'tags',
+        queryset = ProductTag.objects.all(),
+        many=True,
+        write_only=True
+    )
+
     class Meta:
         exclude = ['created_at', 'updated_at'] 
         model = Product
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags', [])
+        product = Product.objects.create(**validated_data)
+        product.tags.set(tags)
+        return product
+    
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags', None)
+        if tags is not None:
+            instance.tags.set(tags)
+        return super().update(instance, validated_data)
 
 class CartSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -53,11 +77,6 @@ class CartSerializer(serializers.ModelSerializer):
         cart.products.add(*products)
         
         return cart
-
-class ProductTagSerializer(serializers.ModelSerializer):
-    class Meta:
-        exclude = ['product_id', 'tag_name']
-        model = ProductTag
 
 class FavoriteProductSerializer(serializers.ModelSerializer):
     class Meta:

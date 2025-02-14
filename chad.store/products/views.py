@@ -92,3 +92,13 @@ class CartViewSet(ListModelMixin,
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+class ProductTagViewSet(ListModelMixin,
+                    CreateModelMixin,
+                    GenericAPIView):
+    queryset = ProductTag.objects.all()
+    serializer_class = ProductTagSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk=None, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
