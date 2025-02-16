@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from products.models import Review, Product, Cart, ProductTag, FavoriteProduct
+from products.models import Review, Product, Cart, ProductTag, FavoriteProduct, ProductImage
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -77,11 +77,6 @@ class CartSerializer(serializers.ModelSerializer):
         cart.products.add(*products)
         
         return cart
-
-class FavoriteProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        exclude = ['product_id', 'user_id']
-        model = FavoriteProduct
         
 class FavoriteProductSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -109,3 +104,8 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('This product is already in favorites')
         
         return favorite_product
+    
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'product']

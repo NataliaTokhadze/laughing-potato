@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
-from products.models import Product, Review, Cart, ProductTag, FavoriteProduct
-from products.serializers import ProductSerializer, ReviewSerializer, CartSerializer, ProductTagSerializer, FavoriteProductSerializer
+from products.models import Product, Review, Cart, ProductTag, FavoriteProduct, ProductImage
+from products.serializers import ProductSerializer, ReviewSerializer, CartSerializer, ProductTagSerializer, FavoriteProductSerializer, ProductImageSerializer
 
 
 class ProductViewSet(ListModelMixin,
@@ -93,7 +93,7 @@ class CartViewSet(ListModelMixin,
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-class ProductTagViewSet(ListModelMixin,
+class ProductTagListViewSet(ListModelMixin,
                     CreateModelMixin,
                     GenericAPIView):
     queryset = ProductTag.objects.all()
@@ -102,3 +102,27 @@ class ProductTagViewSet(ListModelMixin,
 
     def get(self, request, pk=None, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+    
+class ProductImageViewSet(ListModelMixin,
+                    CreateModelMixin,
+                    RetrieveModelMixin,
+                    DestroyModelMixin,
+                    GenericAPIView):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        queryset = self.queryset.filter(product__id=self.kwargs.get('product_id'))
+        return queryset
+    
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)

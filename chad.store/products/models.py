@@ -8,6 +8,7 @@ class Product(TimeStampedModel, models.Model):
     description = models.TextField()
     price = models.FloatField()
     currency = models.CharField(max_length=255, choices=Currency.choices, default=Currency.GEL)
+    tags = models.ManyToManyField('products.ProductTag', related_name='products', blank=True)
     quantity = models.PositiveIntegerField()
 
     def average_rating(self):
@@ -27,10 +28,8 @@ class FavoriteProduct(TimeStampedModel, models.Model):
 
 
 class ProductTag(TimeStampedModel, models.Model):
-    tag_name = models.CharField(max_length=255)   
-    products = models.ManyToManyField('products.Product', related_name='products_tags')
-
-
+    tag_name = models.CharField(max_length=255)
+    
 class Cart(TimeStampedModel, models.Model):
     products = models.ManyToManyField('products.Product', related_name='carts')
     user = models.OneToOneField('users.User', related_name='cart', on_delete=models.SET_NULL, null=True, blank=True)
