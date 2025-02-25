@@ -1,12 +1,12 @@
 from django.urls import path, include
 from rest_framework_nested import routers
-from rest_framework.routers import SimpleRouter, DefaultRouter
-from categories.views import (CategoryListViewSet,
+from rest_framework.routers import DefaultRouter
+from categories.views import (CategoryViewSet,
                               CategoryDetailViewSet,
                               CategoryImageViewSet,)
 
 router = routers.DefaultRouter()
-router.register('categories', CategoryListViewSet)
+router.register('categories', CategoryViewSet)
 
 categories_router = routers.NestedDefaultRouter(
     router,
