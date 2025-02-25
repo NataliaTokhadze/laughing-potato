@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework_nested import routers
+from rest_framework.routers import SimpleRouter, DefaultRouter
 from products.views import (ProductViewSet,
                             ReviewViewSet,
                             CartViewSet,
@@ -6,14 +8,21 @@ from products.views import (ProductViewSet,
                             ProductImageViewSet,
                             FavoriteProductViewSet)
 
+router = routers.DefaultRouter()
+router.register('products', ProductViewSet)
+router.register('cart', CartViewSet)
+router.register('tags', ProductTagListViewSet)
+router.register('favorite_products', FavoriteProductViewSet)
+
+products_router = routers.NestedDefaultRouter(
+    router,
+    'products',
+    lookup='product'
+)
+products_router.register('images', ProductImageViewSet, basename='product_images')
+products_router.register('reviews', ReviewViewSet, basename='product_reviews')
+
 urlpatterns = [
-    path('products/', ProductViewSet.as_view({'get': 'list', 'post': 'create'}), name="products"),
-    path('products/<int:pk>/', ProductViewSet.as_view({'get': 'retrieve', 'post': 'create', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='product'),
-    path('products/<int:product_id>/reviews/', ReviewViewSet.as_view(), name="reviews"),
-    path('cart/', CartViewSet.as_view(), name='cart'),
-    path('tags/', ProductTagListViewSet.as_view(), name='tags'),
-    path('favorite_products/', FavoriteProductViewSet.as_view({'get': 'list', 'post': 'create'}), name='favorite_products'),
-    path('favorite_products/<int:pk>/', FavoriteProductViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='favorite_product'),
-    path('products/<int:product_id>/images/', ProductImageViewSet.as_view({'get': 'list', 'post': 'create'}), name='images'),
-    path('products/<int:product_id>/images/<int:pk>', ProductImageViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='image')
+    path('', include(router.urls)),
+    path('', include(products_router.urls)),
 ]
