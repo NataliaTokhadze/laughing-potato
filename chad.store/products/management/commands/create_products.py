@@ -30,5 +30,5 @@ class Command(BaseCommand):
             )
             products_to_create.append(product)
 
-            Product.objects.bulk_create(products_to_create, batch_size=100)
-            print(f'Created {len(products_to_create)} products')
+        Product.objects.bulk_create(products_to_create, batch_size=100)
+        print(f'Created {len(products_to_create)} products')
