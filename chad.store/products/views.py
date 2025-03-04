@@ -1,17 +1,12 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied 
-from products.models import Product, Review, Cart, ProductTag, FavoriteProduct, ProductImage
-from products.serializers import ProductSerializer, ReviewSerializer, CartSerializer, ProductTagSerializer, FavoriteProductSerializer, ProductImageSerializer
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from products.models import Product, Review, Cart, CartItem, ProductTag, FavoriteProduct, ProductImage
+from products.serializers import ProductSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, ProductTagSerializer, FavoriteProductSerializer, ProductImageSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 from products.pagination import ProductPagination
 from products.filter import ProductFilter, ReviewFilter
 
@@ -39,7 +34,7 @@ class ReviewViewSet(ModelViewSet):
         review = self.get_object()
         if review.user != self.request.user:
             raise PermissionDenied('JUST NO')
-        serialiser.save()
+        serializer.save()
         
     def perform_destroy(self, instance):
         if instance.user != self.request.user:
@@ -64,7 +59,26 @@ class CartViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
         return queryset
-    
+
+class CartItemViewSet(ModelViewSet):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(cart__user=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.cart.user != self.request.user:
+            raise PermissionDenied('NET')
+        instance.delete()
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        if instance.cart.user != self.request.user:
+            raise PermissionDenied('NET')
+        serializer.save()
+
 class ProductTagListViewSet(ListModelMixin, GenericViewSet):
     queryset = ProductTag.objects.all()
     serializer_class = ProductTagSerializer

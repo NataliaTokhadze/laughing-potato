@@ -4,6 +4,7 @@ from rest_framework.routers import SimpleRouter, DefaultRouter
 from products.views import (ProductViewSet,
                             ReviewViewSet,
                             CartViewSet,
+                            CartItemViewSet,
                             ProductTagListViewSet,
                             ProductImageViewSet,
                             FavoriteProductViewSet)
@@ -11,6 +12,7 @@ from products.views import (ProductViewSet,
 router = routers.DefaultRouter()
 router.register('products', ProductViewSet)
 router.register('cart', CartViewSet)
+router.register('cart_item', CartItemViewSet)
 router.register('tags', ProductTagListViewSet)
 router.register('favorite_products', FavoriteProductViewSet)
 
