@@ -1,9 +1,11 @@
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied 
 from rest_framework.filters import SearchFilter
+from rest_framework.decorators import action
 from products.models import Product, Review, Cart, CartItem, ProductTag, FavoriteProduct, ProductImage
 from products.serializers import ProductSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, ProductTagSerializer, FavoriteProductSerializer, ProductImageSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -18,6 +20,12 @@ class ProductViewSet(ListModelMixin, CreateModelMixin, RetrieveModelMixin, Updat
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
+
+    @action(detail=False, methods=['get'])
+    def myproducts(self, request):
+        my_product = Product.objects.filter(user=self.request.user)
+        serializer = self.get_serializer(my_product, many=True)
+        return Response(serializer.data)
     
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()

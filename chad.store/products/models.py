@@ -10,6 +10,7 @@ class Product(TimeStampedModel, models.Model):
     currency = models.CharField(max_length=255, choices=Currency.choices, default=Currency.GEL)
     tags = models.ManyToManyField('products.ProductTag', related_name='products', blank=True)
     quantity = models.PositiveIntegerField()
+    user = models.ForeignKey('users.User', related_name='users', on_delete=models.SET_NULL, null=True, blank=True)
 
 class Review(TimeStampedModel, models.Model):
     product = models.ForeignKey('products.Product', related_name='reviews', on_delete=models.CASCADE)
