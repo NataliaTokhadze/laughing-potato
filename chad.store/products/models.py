@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
 from config.model_utils.models import TimeStampedModel
+from config.util.image_validators import validate_image_size, validate_image_dimensions, validate_image_count
 from products.choices import Currency
 
 class Product(TimeStampedModel, models.Model):
@@ -48,6 +49,14 @@ class CartItem(TimeStampedModel, models.Model):
 
 
 class ProductImage(TimeStampedModel, models.Model):
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/', validators=[validate_image_size, validate_image_dimensions])
     product = models.ForeignKey('products.Product', related_name='images', on_delete=models.CASCADE)
     
+    def clean(self):
+        if self.product_id:
+            validate_image_count(self.product_id)
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

@@ -1,11 +1,13 @@
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied 
+from rest_framework.exceptions import PermissionDenied, ValidationError 
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
 from products.models import Product, Review, Cart, CartItem, ProductTag, FavoriteProduct, ProductImage
 from products.serializers import ProductSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, ProductTagSerializer, FavoriteProductSerializer, ProductImageSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,6 +19,7 @@ class ProductViewSet(ListModelMixin, CreateModelMixin, RetrieveModelMixin, Updat
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = ProductPagination
+    parser_classes = (MultiPartParser, FormParser)
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
@@ -100,3 +103,9 @@ class ProductImageViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, G
     def get_queryset(self):
         queryset = self.queryset.filter(product__id=self.kwargs.get('product_id'))
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as e:
+            Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
